@@ -52,9 +52,9 @@ else:
     with open(save_file_name, 'w') as temp_output_file:
         writer = csv.writer(temp_output_file)
         writer.writerows(text_data)
-
-texts = [x[1] for x in text_data]
-target = [x[0] for x in text_data]
+print(text_data)
+texts = [x[1] for x in text_data if len(x)]
+target = [x[0] for x in text_data if len(x)]
 
 # Relabel 'spam' as 1, 'ham' as 0
 target = [1 if x == 'spam' else 0 for x in target]
@@ -68,6 +68,7 @@ texts = [''.join(c for c in x if c not in string.punctuation) for x in texts]
 
 # Remove numbers
 texts = [''.join(c for c in x if c not in '0123456789') for x in texts]
+print(texts)
 
 # Trim extra whitespace
 texts = [' '.join(x.split()) for x in texts]
@@ -138,15 +139,15 @@ train_acc_all = []
 train_acc_avg = []
 for ix, t in enumerate(vocab_processor.fit_transform(texts_train)):
     y_data = [[target_train[ix]]]
-    
+
     # Run through each observation for training
     sess.run(train_step, feed_dict={x_data: t, y_target: y_data})
     temp_loss = sess.run(loss, feed_dict={x_data: t, y_target: y_data})
     loss_vec.append(temp_loss)
-    
+
     if (ix + 1) % 10 == 0:
         print('Training Observation #{}, Loss = {}'.format(ix+1, temp_loss))
-        
+
     # Keep trailing average of past 50 observations accuracy
     # Get prediction of single observation
     [[temp_pred]] = sess.run(prediction, feed_dict={x_data:t, y_target:y_data})
@@ -161,10 +162,10 @@ print('Getting Test Set Accuracy For {} Sentences.'.format(len(texts_test)))
 test_acc_all = []
 for ix, t in enumerate(vocab_processor.fit_transform(texts_test)):
     y_data = [[target_test[ix]]]
-    
+
     if (ix + 1) % 50 == 0:
         print('Test Observation #{}'.format(str(ix+1)))
-    
+
     # Keep trailing average of past 50 observations accuracy
     # Get prediction of single observation
     [[temp_pred]] = sess.run(prediction, feed_dict={x_data:t, y_target:y_data})
